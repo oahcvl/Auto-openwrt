@@ -12,6 +12,23 @@ name: 编译OpenWrt固件
 on:
   workflow_dispatch:
     inputs:
+      source_branch:
+        description: "机型选择"
+        required: false
+        default: "Lede_x86_64"
+        type: choice
+        options:
+          - Lede_x86_64
+          - Lienol_x86_64
+          - Project_x86_64
+          - Lede_redmi_ac2100
+          - Lede_newifi_d2
+          - Project_newifi_d2
+          - Lede_phicomm_k2p
+          - Lienol_phicomm_k2p
+          - Lienol_phicomm_k3
+          - Project_phicomm_k3
+      
       name:
         description: 'Person to greet'
         required: true
@@ -50,7 +67,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [Project_newifi_d2]
+        target: ["${{ inputs.source_branch }}"]
     steps:
     - name: 准备结束
       uses: actions/checkout@v2
