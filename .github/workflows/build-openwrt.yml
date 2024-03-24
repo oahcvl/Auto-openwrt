@@ -16,7 +16,23 @@ on:
         description: 'Person to greet'
         required: true
         default: 'build-openwrt'
-
+      
+      source_branch:
+        description: "机型选择"
+        required: false
+        default: "Lede_x86_64"
+        type: choice
+        options:
+          - Lede_x86_64
+          - Lienol_x86_64
+          - Project_x86_64
+          - Lede_redmi_ac2100
+          - Lede_newifi_d2
+          - Project_newifi_d2
+          - Lede_phicomm_k2p
+          - Lienol_phicomm_k2p
+          - Lienol_phicomm_k3
+          - Project_phicomm_k3
 
 #编辑任意指定文件触发开始编译
 #  push:
@@ -51,8 +67,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [Lede_x86_64]  #[Lede_x86_64,Lede_redmi_ac2100,Lede_newifi_d2,Lede_phicomm_k2p,Lienol_x86_64,Lienol_phicomm_k2p,Lienol_phicomm_k3,Project_x86_64,Project_newifi_d2,Project_phicomm_k3]
-
+        target: ${{ inputs.source_branch }}
     steps:
     - name: 准备结束
       uses: actions/checkout@v2
