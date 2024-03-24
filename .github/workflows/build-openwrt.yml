@@ -12,10 +12,10 @@ name: 编译OpenWrt固件
 on:
   workflow_dispatch:
     inputs:
-      name:
-        description: 'Person to greet'
-        required: true
-        default: 'build-openwrt'
+      #name:
+        #description: 'Person to greet'
+        #required: true
+        #default: 'build-openwrt'
       
       source_branch:
         description: "机型选择"
