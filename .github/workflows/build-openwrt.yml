@@ -67,7 +67,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [${{ inputs.source_branch }}]
+        target: ${{ inputs.source_branch }}
     steps:
     - name: 准备结束
       uses: actions/checkout@v2
