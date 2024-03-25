@@ -7,28 +7,15 @@
 #
 
 
-name: 自编译固件
+name: Project_newifi_d2自编译固件
 
 on:
   workflow_dispatch:
     inputs:
-      source_branch:
-        description: "机型选择"
-        required: false
-        default: "Lede_x86_64"
-        type: choice
-        options:
-          - Lede_x86_64
-          - Lienol_x86_64
-          - Project_x86_64
-          - Lede_redmi_ac2100
-          - Lede_newifi_d2
-          - Project_newifi_d2
-      
       name:
         description: '自定义编译执行文件名'
         required: true
-        default: '自编'
+        default: 'Project_newifi_d2自编'
 
 #编辑任意指定文件触发开始编译
 #  push:
@@ -63,7 +50,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["${{ inputs.source_branch }}"]
+        target: [Project_newifi_d2]
     steps:
     
     - name: 准备结束
@@ -71,10 +58,10 @@ jobs:
  
     - name: 检测脚本设置
       run: |
+        source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
         echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
         echo "untrusted output"
         echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
-        source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
         echo "::set-env name=REPO_URL::${REPO_URL}"
         echo "::set-env name=REPO_BRANCH::${REPO_BRANCH}"
         echo "::set-env name=CONFIG_FILE::${CONFIG_FILE}"
