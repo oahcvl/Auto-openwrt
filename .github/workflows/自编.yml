@@ -56,7 +56,7 @@ env:
 
 jobs:   
   build:
-    runs-on: ubuntu-22.04    
+    runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
 
     name: 编译 ${{matrix.target}}
@@ -67,9 +67,9 @@ jobs:
     steps:
     - name: log untrusted output
       run: |
-          echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
-          echo "untrusted output"
-          echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
+            echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
+            echo "untrusted output"
+            echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
     - name: 准备结束
       uses: actions/checkout@v2
  
