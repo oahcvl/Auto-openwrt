@@ -38,7 +38,7 @@ on:
 env:
   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
   SCKEY: ${{ secrets.SCKEY }}
-  GITHUB_RELEASE: https://github.com/281677160/Actions-OpenWrt/releases
+  GITHUB_RELEASE: ""
   TZ: Asia/Shanghai
 
 jobs:   
@@ -59,7 +59,6 @@ jobs:
     - name: 检测脚本设置
       run: |
         source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
-        
         echo heroku config:set REPO_URL=${REPO_URL}
         echo heroku config:set REPO_BRANCH=${REPO_BRANCH}
         echo heroku config:set CONFIG_FILE=${CONFIG_FILE}
@@ -99,7 +98,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        git clone --depth 1 ${REPO_URL} -b ${REPO_BRANCH} openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: 加载源,patch补丁和自定义设置
