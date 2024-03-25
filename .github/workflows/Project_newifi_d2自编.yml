@@ -59,19 +59,19 @@ jobs:
     - name: 检测脚本设置
       run: |
         source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
-        echo heroku config:set REPO_URL=${REPO_URL}
-        echo heroku config:set REPO_BRANCH=${REPO_BRANCH}
-        echo heroku config:set CONFIG_FILE=${CONFIG_FILE}
-        echo heroku config:set WXFB_MESSAGE=${WXFB_MESSAGE}
-        echo heroku config:set DIY_P1_SH=${DIY_P1_SH}
-        echo heroku config:set DIY_P2_SH=${DIY_P2_SH}
-        echo heroku config:set SSH_ACTIONS=${SSH_ACTIONS}
-        echo heroku config:set UPLOAD_BIN_DIR=${UPLOAD_BIN_DIR}
-        echo heroku config:set UPLOAD_CONFIG=${UPLOAD_CONFIG}
-        echo heroku config:set UPLOAD_FIRMWARE=${UPLOAD_FIRMWARE}
-        echo heroku config:set UPLOAD_COWTRANSFER=${UPLOAD_COWTRANSFER}
-        echo heroku config:set UPLOAD_RELEASE=${UPLOAD_RELEASE}
-        echo heroku config:set SERVERCHAN_SCKEY=${SERVERCHAN_SCKEY}
+        echo "heroku config:set REPO_URL=${REPO_URL}"
+        echo "heroku config:set REPO_BRANCH=${REPO_BRANCH}"
+        echo "heroku config:set CONFIG_FILE=${CONFIG_FILE}"
+        echo "heroku config:set WXFB_MESSAGE=${WXFB_MESSAGE}"
+        echo "heroku config:set DIY_P1_SH=${DIY_P1_SH}"
+        echo "heroku config:set DIY_P2_SH=${DIY_P2_SH}"
+        echo "heroku config:set SSH_ACTIONS=${SSH_ACTIONS}"
+        echo "heroku config:set UPLOAD_BIN_DIR=${UPLOAD_BIN_DIR}"
+        echo "heroku config:set UPLOAD_CONFIG=${UPLOAD_CONFIG}"
+        echo "heroku config:set UPLOAD_FIRMWARE=${UPLOAD_FIRMWARE}"
+        echo "heroku config:set UPLOAD_COWTRANSFER=${UPLOAD_COWTRANSFER}"
+        echo "heroku config:set UPLOAD_RELEASE=${UPLOAD_RELEASE}"
+        echo "heroku config:set SERVERCHAN_SCKEY=${SERVERCHAN_SCKEY}"
     
     - name: 微信通知
       if: env.SERVERCHAN_SCKEY == 'true'
@@ -98,7 +98,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone --depth 1 REPO_URL -b REPO_BRANCH openwrt
+        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: 加载源,patch补丁和自定义设置
