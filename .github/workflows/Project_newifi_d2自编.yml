@@ -59,7 +59,7 @@ jobs:
  
     - name: 检测脚本设置
       run: |
-        #export REPO_URL="你的仓库URL"
+        export REPO_URL="https://github.com/oahcvl/Auto-openwrt"
         source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
         # 检查REPO_URL变量是否已设置
         if [ -n "$REPO_URL" ]; then
