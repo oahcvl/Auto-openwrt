@@ -43,7 +43,7 @@ env:
 
 jobs:   
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-18.04
     if: github.event.repository.owner.id == github.event.sender.id
 
     name: 编译 ${{matrix.target}}
@@ -59,9 +59,6 @@ jobs:
     - name: 检测脚本设置
       run: |
         source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
-        echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
-        echo "untrusted output"
-        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
         echo "::set-env name=REPO_URL::${REPO_URL}"
         echo "::set-env name=REPO_BRANCH::${REPO_BRANCH}"
         echo "::set-env name=CONFIG_FILE::${CONFIG_FILE}"
@@ -90,7 +87,7 @@ jobs:
       run: |
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2204)
+        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
