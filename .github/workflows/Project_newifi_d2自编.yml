@@ -98,7 +98,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone ${REPO_URL} -b ${REPO_BRANCH} openwrt
+        git clone --path 1 ${env.REPO_URL} -b ${env.REPO_BRANCH} openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: 加载源,patch补丁和自定义设置
