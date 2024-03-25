@@ -59,8 +59,17 @@ jobs:
  
     - name: 检测脚本设置
       run: |
+        #export REPO_URL="你的仓库URL"
         source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
-        echo "heroku config:set REPO_URL=${REPO_URL}"
+        # 检查REPO_URL变量是否已设置
+        if [ -n "$REPO_URL" ]; then
+          # 如果REPO_URL已设置，则在Heroku上设置该环境变量
+          heroku config:set REPO_URL="$REPO_URL"
+        else
+          # 如果REPO_URL未设置，则输出错误消息
+          echo "错误: REPO_URL 没有设置"
+        fi
+        #echo "heroku config:set REPO_URL=${REPO_URL}"
         echo "heroku config:set REPO_BRANCH=${REPO_BRANCH}"
         echo "heroku config:set CONFIG_FILE=${CONFIG_FILE}"
         echo "heroku config:set WXFB_MESSAGE=${WXFB_MESSAGE}"
