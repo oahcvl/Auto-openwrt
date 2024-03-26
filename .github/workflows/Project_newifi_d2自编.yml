@@ -12,11 +12,6 @@ name: Project_newifi_d2自编译固件
 on:
   repository_dispatch:
   workflow_dispatch:
-    inputs:
-      name:
-        description: '自定义编译执行文件名'
-        required: true
-        default: 'Project_newifi_d2自编'
 
 #编辑任意指定文件触发开始编译
 #  push:
