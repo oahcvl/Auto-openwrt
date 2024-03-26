@@ -7,7 +7,7 @@
 #
 
 
-name: Project_newifi_d2自编译固件
+name: 可选择通用自编译固件
 
 on:
   repository_dispatch:
