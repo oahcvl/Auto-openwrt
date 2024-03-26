@@ -6,7 +6,7 @@
 
 - [新脚本简单介绍](https://github.com/danshui-git/shuoming/blob/master/%E7%AE%80%E5%8D%95%E4%BB%8B%E7%BB%8D%E6%96%B0%E8%84%9A%E6%9C%AC.md)
 
-#
+
 #
 - 感谢[coolsnowwolf](https://github.com/coolsnowwolf/lede.git)大神提供的源码
 - 感谢[Lienol](https://github.com/Lienol/openwrt.git)大神提供的源码
