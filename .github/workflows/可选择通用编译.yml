@@ -7,7 +7,7 @@
 #
 
 
-name: 可选择通用自编译固件
+name: 可选择自编译固件
 
 on:
   repository_dispatch:
