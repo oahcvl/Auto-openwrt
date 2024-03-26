@@ -59,29 +59,20 @@ jobs:
  
     - name: 检测脚本设置
       run: |
-        export REPO_URL="https://github.com/oahcvl/Auto-openwrt"
         source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
-        # 检查REPO_URL变量是否已设置
-        if [ -n "$REPO_URL" ]; then
-          # 如果REPO_URL已设置，则在Heroku上设置该环境变量
-          heroku config:set REPO_URL="$REPO_URL"
-        else
-          # 如果REPO_URL未设置，则输出错误消息
-          echo "错误: REPO_URL 没有设置"
-        fi
-        #echo "heroku config:set REPO_URL=${REPO_URL}"
-        echo "heroku config:set REPO_BRANCH=${REPO_BRANCH}"
-        echo "heroku config:set CONFIG_FILE=${CONFIG_FILE}"
-        echo "heroku config:set WXFB_MESSAGE=${WXFB_MESSAGE}"
-        echo "heroku config:set DIY_P1_SH=${DIY_P1_SH}"
-        echo "heroku config:set DIY_P2_SH=${DIY_P2_SH}"
-        echo "heroku config:set SSH_ACTIONS=${SSH_ACTIONS}"
-        echo "heroku config:set UPLOAD_BIN_DIR=${UPLOAD_BIN_DIR}"
-        echo "heroku config:set UPLOAD_CONFIG=${UPLOAD_CONFIG}"
-        echo "heroku config:set UPLOAD_FIRMWARE=${UPLOAD_FIRMWARE}"
-        echo "heroku config:set UPLOAD_COWTRANSFER=${UPLOAD_COWTRANSFER}"
-        echo "heroku config:set UPLOAD_RELEASE=${UPLOAD_RELEASE}"
-        echo "heroku config:set SERVERCHAN_SCKEY=${SERVERCHAN_SCKEY}"
+        echo "REPO_URL is: $REPO_URL"
+        echo "REPO_BRANCH is: $REPO_BRANCH"
+        echo "CONFIG_FILE is: $CONFIG_FILE"
+        echo "WXFB_MESSAGE is: $WXFB_MESSAGE"
+        echo "DIY_P1_SH is: $DIY_P1_SH"
+        echo "DIY_P2_SH is: $DIY_P2_SH"
+        echo "SSH_ACTIONS is: $SSH_ACTIONS"
+        echo "UPLOAD_BIN_DIR is: $UPLOAD_BIN_DIR"
+        echo "UPLOAD_CONFIG is: $UPLOAD_CONFIG"
+        echo "UPLOAD_FIRMWARE is: $UPLOAD_FIRMWARE"
+        echo "UPLOAD_COWTRANSFER is: $UPLOAD_COWTRANSFER"
+        echo "UPLOAD_RELEASE is: $UPLOAD_RELEASE"
+        echo "SERVERCHAN_SCKEY is: $SERVERCHAN_SCKEY"
     
     - name: 微信通知
       if: env.SERVERCHAN_SCKEY == 'true'
