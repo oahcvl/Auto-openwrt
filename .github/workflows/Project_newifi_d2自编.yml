@@ -60,19 +60,19 @@ jobs:
     - name: 检测脚本设置
       run: |
         source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
-        echo "REPO_URL is: $REPO_URL"
-        echo "REPO_BRANCH is: $REPO_BRANCH"
-        echo "CONFIG_FILE is: $CONFIG_FILE"
-        echo "WXFB_MESSAGE is: $WXFB_MESSAGE"
-        echo "DIY_P1_SH is: $DIY_P1_SH"
-        echo "DIY_P2_SH is: $DIY_P2_SH"
-        echo "SSH_ACTIONS is: $SSH_ACTIONS"
-        echo "UPLOAD_BIN_DIR is: $UPLOAD_BIN_DIR"
-        echo "UPLOAD_CONFIG is: $UPLOAD_CONFIG"
-        echo "UPLOAD_FIRMWARE is: $UPLOAD_FIRMWARE"
-        echo "UPLOAD_COWTRANSFER is: $UPLOAD_COWTRANSFER"
-        echo "UPLOAD_RELEASE is: $UPLOAD_RELEASE"
-        echo "SERVERCHAN_SCKEY is: $SERVERCHAN_SCKEY"
+        echo "REPO_URL=$REPO_URL" >> $GITHUB_ENV
+        echo "REPO_BRANCH=$REPO_BRANCH" >> $GITHUB_ENV
+        echo "CONFIG_FILE=$CONFIG_FILE" >> $GITHUB_ENV
+        echo "WXFB_MESSAGE=$WXFB_MESSAGE" >> $GITHUB_ENV
+        echo "DIY_P1_SH=$DIY_P1_SH" >> $GITHUB_ENV
+        echo "DIY_P2_SH=$DIY_P2_SH" >> $GITHUB_ENV
+        echo "SSH_ACTIONS=$SSH_ACTIONS" >> $GITHUB_ENV
+        echo "UPLOAD_BIN_DIR=$UPLOAD_BIN_DIR" >> $GITHUB_ENV
+        echo "UPLOAD_CONFIG=$UPLOAD_CONFIG" >> $GITHUB_ENV
+        echo "UPLOAD_FIRMWARE=$UPLOAD_FIRMWARE" >> $GITHUB_ENV
+        echo "UPLOAD_COWTRANSFER=$UPLOAD_COWTRANSFER" >> $GITHUB_ENV
+        echo "UPLOAD_RELEASE=$UPLOAD_RELEASE" >> $GITHUB_ENV
+        echo "SERVERCHAN_SCKEY=$SERVERCHAN_SCKEY" >> $GITHUB_ENV
     
     - name: 微信通知
       if: env.SERVERCHAN_SCKEY == 'true'
