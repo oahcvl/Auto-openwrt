@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [inputs.source_branch]
+        target: ["${{ inputs.source_branch }}"]
     steps:
       - name: 检测脚本设置
         run: |
