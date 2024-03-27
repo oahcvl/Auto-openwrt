@@ -7,14 +7,14 @@
 #
 
 
-name: Project_newifi_d2自编译固件
+name: 选择自编译固件
 
 on:
   repository_dispatch:
   workflow_dispatch:
     inputs:
         source_branch:
-          description: "机型选择"
+          description: "选择机型"
           required: false
           默认: "Lede_x86_64"
           type: choice
