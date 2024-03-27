@@ -12,7 +12,23 @@ name: build-openwrt
 on:
   repository_dispatch:
   workflow_dispatch:
-
+    inputs:
+      source_branch:
+        description: "选择机型"
+        required: false
+        default: "Lede_x86_64"
+        type: choice
+        options:
+          - Lede_x86_64
+          - Lienol_x86_64
+          - Project_x86_64
+          - Lede_redmi_ac2100
+          - Lede_newifi_d2
+          - Project_newifi_d2
+          - Lede_phicomm_k2p
+          - Lienol_phicomm_k2p
+          - Lienol_phicomm_k3
+          - Project_phicomm_k3
 
 #定时触发开始编译(开启定时编译请先确定SSH处在关闭状态,要不然SSH没人管,会卡SSH编译失败)
 #  schedule:
@@ -33,7 +49,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [Project_newifi_d2]
+        target: ["${{inputs.source_branch}}"]
     steps:
     
     - name: 准备结束
