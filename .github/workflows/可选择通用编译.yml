@@ -6,28 +6,12 @@
 # <https://github.com/P3TERX/Actions-OpenWrt.git>
 #
 
-name: 可选择自编译固件
+
+name: Project_newifi_d2自编译固件
 
 on:
   repository_dispatch:
   workflow_dispatch:
-    inputs:
-      source_branch:
-        description: "机型选择"
-        required: false
-        default: "Lede_x86_64"
-        type: choice
-        options:
-          - Lede_x86_64
-          - Lienol_x86_64
-          - Project_x86_64
-          - Lede_redmi_ac2100
-          - Lede_newifi_d2
-          - Project_newifi_d2
-          - Lede_phicomm_k2p
-          - Lienol_phicomm_k2p
-          - Lienol_phicomm_k3
-          - Project_phicomm_k3
 
 #编辑任意指定文件触发开始编译
 #  push:
@@ -36,13 +20,16 @@ on:
 #    paths:
 #      - '开启编译openwrt'
 
+
 #定时触发开始编译(开启定时编译请先确定SSH处在关闭状态,要不然SSH没人管,会卡SSH编译失败)
 #  schedule:
 #    - cron: 0 8 */5 * *
 
+
 #点☆Star触发开始编译
-# watch:
+  watch:
 #    types: started
+
 
 env:
   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
@@ -50,7 +37,7 @@ env:
   GITHUB_RELEASE: ""
   TZ: Asia/Shanghai
 
-jobs:
+jobs:   
   build:
     runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
@@ -59,34 +46,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["${{ inputs.source_branch }}"]
+        target: [Project_newifi_d2]
     steps:
-      - name: 检测脚本设置
-        run: |
-          source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
-          echo "REPO_URL=$REPO_URL" >> $GITHUB_ENV
-          echo "REPO_BRANCH=$REPO_BRANCH" >> $GITHUB_ENV
-          echo "CONFIG_FILE=$CONFIG_FILE" >> $GITHUB_ENV
-          echo "WXFB_MESSAGE=$WXFB_MESSAGE" >> $GITHUB_ENV
-          echo "DIY_P1_SH=$DIY_P1_SH" >> $GITHUB_ENV
-          echo "DIY_P2_SH=$DIY_P2_SH" >> $GITHUB_ENV
-          echo "SSH_ACTIONS=$SSH_ACTIONS" >> $GITHUB_ENV
-          echo "UPLOAD_BIN_DIR=$UPLOAD_BIN_DIR" >> $GITHUB_ENV
-          echo "UPLOAD_CONFIG=$UPLOAD_CONFIG" >> $GITHUB_ENV
-          echo "UPLOAD_FIRMWARE=$UPLOAD_FIRMWARE" >> $GITHUB_ENV
-          echo "UPLOAD_COWTRANSFER=$UPLOAD_COWTRANSFER" >> $GITHUB_ENV
-          echo "UPLOAD_RELEASE=$UPLOAD_RELEASE" >> $GITHUB_ENV
-          echo "SERVERCHAN_SCKEY=$SERVERCHAN_SCKEY" >> $GITHUB_ENV
+    
+    - name: 准备结束
+      uses: actions/checkout@v2
+ 
+    - name: 检测脚本设置
+      run: |
+        source "${GITHUB_WORKSPACE}/build/${{matrix.target}}/settings.ini"
+        echo "REPO_URL=$REPO_URL" >> $GITHUB_ENV
+        echo "REPO_BRANCH=$REPO_BRANCH" >> $GITHUB_ENV
+        echo "CONFIG_FILE=$CONFIG_FILE" >> $GITHUB_ENV
+        echo "WXFB_MESSAGE=$WXFB_MESSAGE" >> $GITHUB_ENV
+        echo "DIY_P1_SH=$DIY_P1_SH" >> $GITHUB_ENV
+        echo "DIY_P2_SH=$DIY_P2_SH" >> $GITHUB_ENV
+        echo "SSH_ACTIONS=$SSH_ACTIONS" >> $GITHUB_ENV
+        echo "UPLOAD_BIN_DIR=$UPLOAD_BIN_DIR" >> $GITHUB_ENV
+        echo "UPLOAD_CONFIG=$UPLOAD_CONFIG" >> $GITHUB_ENV
+        echo "UPLOAD_FIRMWARE=$UPLOAD_FIRMWARE" >> $GITHUB_ENV
+        echo "UPLOAD_COWTRANSFER=$UPLOAD_COWTRANSFER" >> $GITHUB_ENV
+        echo "UPLOAD_RELEASE=$UPLOAD_RELEASE" >> $GITHUB_ENV
+        echo "SERVERCHAN_SCKEY=$SERVERCHAN_SCKEY" >> $GITHUB_ENV
   
-      - name: 微信通知
-        if: env.SERVERCHAN_SCKEY == 'true'
-        uses: emon100/Action-Serverchan@master
+    - name: 微信通知
+      if: env.SERVERCHAN_SCKEY == 'true'
+      uses: emon100/Action-Serverchan@master
         with:
           SCKEY: ${{ secrets.SCKEY }}
           text: 开始编译${{ matrix.target }}啦
           desp: 主人您设置要编译的[${{ env.WXFB_MESSAGE }}]固件正在努力耕耘中......
-      
-      - name: 开始安装编译所需系统
+          
+  - name: 开始安装编译所需系统
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
@@ -280,3 +271,5 @@ jobs:
             
             祝小主人见人爱，花见花开，车见车载，天天好心情🎈！！！
   
+
+      
