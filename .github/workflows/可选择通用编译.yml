@@ -95,18 +95,18 @@ jobs:
         desp: 主人您设置要编译的[${{ env.WXFB_MESSAGE }}]固件正在努力耕耘中......
           
     - name: 开始安装编译所需系统
-          env:
-            DEBIAN_FRONTEND: noninteractive
-          run: |
-            sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-            sudo docker image prune --all --force
-            sudo -E apt-get -qq update
-            sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
-            sudo -E apt-get -qq autoremove --purge
-            sudo -E apt-get -qq clean
-            sudo timedatectl set-timezone "$TZ"
-            sudo mkdir -p /workdir
-            sudo chown $USER:$GROUPS /workdir
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+        sudo docker image prune --all --force
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
       
     - name: 克隆源码
       working-directory: /workdir
@@ -115,178 +115,178 @@ jobs:
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
   
-      - name: 加载源, 应用补丁和自定义设置
-        run: |
-          cp -Rf $(find ./ -maxdepth 1 -type d ! -path './openwrt' ! -path './') openwrt
-          cd openwrt
-          echo "应用补丁"
-          if [ -n "$(ls -A "build/${{matrix.target}}/patches" 2>/dev/null)" ]; then
-            (
-              find "build/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%' | patch -d './' -p0 --forward" || true
-            )
-          fi
-          if [ -f "build/${{matrix.target}}/$DIY_P1_SH" ]; then
-            (
-              chmod +x "build/${{matrix.target}}/$DIY_P1_SH"
-              /bin/bash "build/${{matrix.target}}/$DIY_P1_SH"
-            )
-          fi
-          ./scripts/feeds clean
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
-          if [ -n "$(ls -A "build/${{matrix.target}}/files" 2>/dev/null)" ]; then
-            cp -rf "build/${{matrix.target}}/files" files
-          fi
-          if [ -n "$(ls -A "build/${{matrix.target}}/diy" 2>/dev/null)" ]; then
-            cp -Rf "build/${{matrix.target}}/diy"/* ./
-          fi
-          if [ -f "build/${{matrix.target}}/$DIY_P2_SH" ]; then
-            (
-              chmod +x "build/${{matrix.target}}/$DIY_P2_SH"
-              /bin/bash "build/${{matrix.target}}/$DIY_P2_SH"
-            )
-          fi
-          mv "build/${{matrix.target}}/$CONFIG_FILE" .config
-          make defconfig
-          DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' | tr '[:upper:]' '[:lower:]')
-          if [ "$DEVICE_NAME" == "generic" ]; then
-            DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_.*=y/\1/')
-          fi
-          DEVICE_NAME=${DEVICE_NAME/xiaomi_redmi-router/redmi}
-          echo "DEVICE_NAME=$DEVICE_NAME" >> $GITHUB_ENV
-  
-      - name: SSH远程连接服务器配置固件
-        uses: P3TERX/ssh2actions@main
-        if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
-      
-      - name: 下载软件包
-        id: package
-        run: |
-          cd openwrt
-          make download -j8
-          find dl -size -1024c -exec ls -l {} \;
-          find dl -size -1024c -exec rm -f {} \;
-      
-      - name: 开始编译固件
-        id: compile
-        run: |
-          cd openwrt
-          echo -e "$(nproc) thread compile"
-          make -j$(nproc) || make -j1 || make -j1 V=s
-          echo "status=success" >> $GITHUB_OUTPUT
-          echo "date=$(date "+%Y-%m-%d %H.%M")" >> $GITHUB_ENV
-          echo "date1=$(date +'%Y年%m月%d号-%H点%M分')" >> $GITHUB_ENV
-          echo "date2=$(date +'%Y%m%d-%H%M')" >> $GITHUB_ENV
-  
-      - name: 上传bin文件夹（固件+ipk）到GitHub空间
-        uses: actions/upload-artifact@v2
-        if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-        with:
-          name: "OpenWrt_bin_${{ matrix.target }}_${{ env.date }}"
-          path: openwrt/bin
+    - name: 加载源, 应用补丁和自定义设置
+      run: |
+        cp -Rf $(find ./ -maxdepth 1 -type d ! -path './openwrt' ! -path './') openwrt
+        cd openwrt
+        echo "应用补丁"
+        if [ -n "$(ls -A "build/${{matrix.target}}/patches" 2>/dev/null)" ]; then
+          (
+            find "build/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%' | patch -d './' -p0 --forward" || true
+          )
+        fi
+        if [ -f "build/${{matrix.target}}/$DIY_P1_SH" ]; then
+          (
+            chmod +x "build/${{matrix.target}}/$DIY_P1_SH"
+            /bin/bash "build/${{matrix.target}}/$DIY_P1_SH"
+          )
+        fi
+        ./scripts/feeds clean
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        if [ -n "$(ls -A "build/${{matrix.target}}/files" 2>/dev/null)" ]; then
+          cp -rf "build/${{matrix.target}}/files" files
+        fi
+        if [ -n "$(ls -A "build/${{matrix.target}}/diy" 2>/dev/null)" ]; then
+          cp -Rf "build/${{matrix.target}}/diy"/* ./
+        fi
+        if [ -f "build/${{matrix.target}}/$DIY_P2_SH" ]; then
+          (
+            chmod +x "build/${{matrix.target}}/$DIY_P2_SH"
+            /bin/bash "build/${{matrix.target}}/$DIY_P2_SH"
+          )
+        fi
+        mv "build/${{matrix.target}}/$CONFIG_FILE" .config
+        make defconfig
+        DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' | tr '[:upper:]' '[:lower:]')
+        if [ "$DEVICE_NAME" == "generic" ]; then
+          DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_.*=y/\1/')
+        fi
+        DEVICE_NAME=${DEVICE_NAME/xiaomi_redmi-router/redmi}
+        echo "DEVICE_NAME=$DEVICE_NAME" >> $GITHUB_ENV
 
-      - name: 整理固件文件夹
-        id: organizer
-        run: |
-          # 创建config文件夹
-          mkdir -p config
-          # 将openwrt/bin/targets/下的所有*config.buildinfo*文件移动到config文件夹
-          find openwrt/bin/targets/ -name "*config.buildinfo*" -exec mv -f {} config/ \;
-          # 进入openwrt/bin/targets/下的第一个子目录
-          cd "$(ls -d openwrt/bin/targets/*/ | head -n 1)"
-          # 删除并重新创建packages文件夹
-          rm -rf packages && mkdir packages
-          # 将特定类型的文件移动到packages文件夹
-          find . -name "*.buildinfo*" -exec mv -f {} packages/ \;
-          find . -name "*sha256sums*" -exec mv -f {} packages/ \;
-          find . -name "*kernel.bin*" -exec mv -f {} packages/ \;
-          find . -name "*kernel1.bin*" -exec mv -f {} packages/ \;
-          find . -name "*rootfs*" -exec mv -f {} packages/ \;
-          find . -name "*.manifest*" -exec mv -f {} packages/ \;
-          find . -name "*vmlinuz*" -exec mv -f {} packages/ \;
-          find . -name "*esxi.vmdk*" -exec mv -f {} packages/ \;
-          # 再次删除packages文件夹（此步骤可能是多余的，因为上面已经创建了一个空文件夹）
-          # rm -rf packages  # 如果不需要再次删除，可以注释或删除此行
-          # 将FIRMWARE环境变量设置为当前工作目录，并输出到$GITHUB_ENV文件
-          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-          # 向$GITHUB_OUTPUT输出状态信息
-          echo "status=success" >> $GITHUB_OUTPUT
+    - name: SSH远程连接服务器配置固件
+      uses: P3TERX/ssh2actions@main
+      if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
+    
+    - name: 下载软件包
+      id: package
+      run: |
+        cd openwrt
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+    
+    - name: 开始编译固件
+      id: compile
+      run: |
+        cd openwrt
+        echo -e "$(nproc) thread compile"
+        make -j$(nproc) || make -j1 || make -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+        echo "date=$(date "+%Y-%m-%d %H.%M")" >> $GITHUB_ENV
+        echo "date1=$(date +'%Y年%m月%d号-%H点%M分')" >> $GITHUB_ENV
+        echo "date2=$(date +'%Y%m%d-%H%M')" >> $GITHUB_ENV
+
+    - name: 上传bin文件夹（固件+ipk）到GitHub空间
+      uses: actions/upload-artifact@v2
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      with:
+        name: "OpenWrt_bin_${{ matrix.target }}_${{ env.date }}"
+        path: openwrt/bin
+
+    - name: 整理固件文件夹
+      id: organizer
+      run: |
+        # 创建config文件夹
+        mkdir -p config
+        # 将openwrt/bin/targets/下的所有*config.buildinfo*文件移动到config文件夹
+        find openwrt/bin/targets/ -name "*config.buildinfo*" -exec mv -f {} config/ \;
+        # 进入openwrt/bin/targets/下的第一个子目录
+        cd "$(ls -d openwrt/bin/targets/*/ | head -n 1)"
+        # 删除并重新创建packages文件夹
+        rm -rf packages && mkdir packages
+        # 将特定类型的文件移动到packages文件夹
+        find . -name "*.buildinfo*" -exec mv -f {} packages/ \;
+        find . -name "*sha256sums*" -exec mv -f {} packages/ \;
+        find . -name "*kernel.bin*" -exec mv -f {} packages/ \;
+        find . -name "*kernel1.bin*" -exec mv -f {} packages/ \;
+        find . -name "*rootfs*" -exec mv -f {} packages/ \;
+        find . -name "*.manifest*" -exec mv -f {} packages/ \;
+        find . -name "*vmlinuz*" -exec mv -f {} packages/ \;
+        find . -name "*esxi.vmdk*" -exec mv -f {} packages/ \;
+        # 再次删除packages文件夹（此步骤可能是多余的，因为上面已经创建了一个空文件夹）
+        # rm -rf packages  # 如果不需要再次删除，可以注释或删除此行
+        # 将FIRMWARE环境变量设置为当前工作目录，并输出到$GITHUB_ENV文件
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        # 向$GITHUB_OUTPUT输出状态信息
+        echo "status=success" >> $GITHUB_OUTPUT
+        
+    - name: 上传.config配置文件到GitHub空间
+      if: steps.organizer.outputs.status == 'success' && env.UPLOAD_CONFIG == 'true'
+      uses: actions/upload-artifact@v2
+      with:
+        name: .config_${{matrix.target}}_${{ env.date }}
+        path: ./config
+    
+    - name: 上传固件到GitHub空间
+      if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
+      uses: actions/upload-artifact@v2
+      with:
+        name: OpenWrt_firmware_${{matrix.target}}_${{ env.date }}
+        path: ${{ env.FIRMWARE }}
+    
+    - name: 上传固件到「奶牛快传」和「WeTransfer」
+      if: steps.organizer.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL https://git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+        curl -fsSL https://git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        
+    - name: 提取发布用的「奶牛快传」和「WeTransfer」的链接
+      if: steps.organizer.outputs.status == 'success' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+        echo "COWTRANSFER_URL=$(cat cowtransfer.log | grep \"https\" | cut -f3 -d\")\" >> $GITHUB_ENV
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+        echo "WETRANSFER_URL=$(cat wetransfer.log | grep https | cut -f3 -d\")\" >> $GITHUB_ENV
+
+    - name: 自动发布固件
+      uses: softprops/action-gh-release@v1
+      if: steps.organizer.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true'
+      env:
+        GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+      with:
+        name: ${{ env.date1 }} 「 ${{ env.WXFB_MESSAGE }} 」固件
+        tag_name: ${{ env.date2 }}
+        body: |
+          ☆  源码 : ${{ env.REPO_URL }}
+          ☆  分支 : ${{ env.REPO_BRANCH }}
+          ☆  感谢源码作者无私分享！
+    
+          🎉 [ ${{ matrix.target }} ]固件下载 ✨
+    
+          💐 奶牛快传(国内高速🚀下载)： ${{ env.COWTRANSFER_URL }}
+    
+          ⛄ WeTransfer(国外高速🚀下载)： ${{ env.WETRANSFER_URL }}
+    
+          🌴 链接有效期为7天，无需注册直接下载 🐤
+        文件: ${{ env.FIRMWARE }}/*
+
+    - name: 微信通知
+      if: steps.organizer.outputs.status == 'success' && env.SERVERCHAN_SCKEY == 'true'
+      uses: emon100/Action-Serverchan@master
+      with:
+        SCKEY: ${{ secrets.SCKEY }}
+        text: |-
+          恭喜主人${{ matrix.target }}固件编译成功！
           
-      - name: 上传.config配置文件到GitHub空间
-        if: steps.organizer.outputs.status == 'success' && env.UPLOAD_CONFIG == 'true'
-        uses: actions/upload-artifact@v2
-        with:
-          name: .config_${{matrix.target}}_${{ env.date }}
-          path: ./config
-      
-      - name: 上传固件到GitHub空间
-        if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
-        uses: actions/upload-artifact@v2
-        with:
-          name: OpenWrt_firmware_${{matrix.target}}_${{ env.date }}
-          path: ${{ env.FIRMWARE }}
-      
-      - name: 上传固件到「奶牛快传」和「WeTransfer」
-        if: steps.organizer.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
-        run: |
-          curl -fsSL https://git.io/file-transfer | sh
-          ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-          echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-          curl -fsSL https://git.io/file-transfer | sh
-          ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
-          echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+          完成时间：${{ env.date1 }}
           
-      - name: 提取发布用的「奶牛快传」和「WeTransfer」的链接
-        if: steps.organizer.outputs.status == 'success' && !cancelled()
-        run: |
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-          echo "COWTRANSFER_URL=$(cat cowtransfer.log | grep \"https\" | cut -f3 -d\")\" >> $GITHUB_ENV
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
-          echo "WETRANSFER_URL=$(cat wetransfer.log | grep https | cut -f3 -d\")\" >> $GITHUB_ENV
-  
-      - name: 自动发布固件
-        uses: softprops/action-gh-release@v1
-        if: steps.organizer.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
-        with:
-          name: ${{ env.date1 }} 「 ${{ env.WXFB_MESSAGE }} 」固件
-          tag_name: ${{ env.date2 }}
-          body: |
-            ☆  源码 : ${{ env.REPO_URL }}
-            ☆  分支 : ${{ env.REPO_BRANCH }}
-            ☆  感谢源码作者无私分享！
-      
-            🎉 [ ${{ matrix.target }} ]固件下载 ✨
-      
-            💐 奶牛快传(国内高速🚀下载)： ${{ env.COWTRANSFER_URL }}
-      
-            ⛄ WeTransfer(国外高速🚀下载)： ${{ env.WETRANSFER_URL }}
-      
-            🌴 链接有效期为7天，无需注册直接下载 🐤
-          文件: ${{ env.FIRMWARE }}/*
-  
-      - name: 微信通知
-        if: steps.organizer.outputs.status == 'success' && env.SERVERCHAN_SCKEY == 'true'
-        uses: emon100/Action-Serverchan@master
-        with:
-          SCKEY: ${{ secrets.SCKEY }}
-          text: |-
-            恭喜主人${{ matrix.target }}固件编译成功！
-            
-            完成时间：${{ env.date1 }}
-            
-            发布地址：${{ env.GITHUB_RELEASE }}
-            
-            奶牛快传：${{ env.COWTRANSFER_URL }}
-            
-            WeTransfer：${{ env.WETRANSFER_URL }}
-          desp: |-
-            我亲爱的主人您要编译的${{ env.WXFB_MESSAGE }}固件成功完成了！
-            
-            祝小主人见人爱，花见花开，车见车载，天天好心情🎈！！！
+          发布地址：${{ env.GITHUB_RELEASE }}
+          
+          奶牛快传：${{ env.COWTRANSFER_URL }}
+          
+          WeTransfer：${{ env.WETRANSFER_URL }}
+        desp: |-
+          我亲爱的主人您要编译的${{ env.WXFB_MESSAGE }}固件成功完成了！
+          
+          祝小主人见人爱，花见花开，车见车载，天天好心情🎈！！！
   
 
       
