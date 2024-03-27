@@ -167,7 +167,7 @@ jobs:
       - name: 上传bin文件夹（固件+ipk）到GitHub空间
         uses: actions/upload-artifact@v2
         if: |-
-          success == $(cat $GITHUB_OUTPUT | grep "status=" | awk -F'=' '{print $2}')
+          success == $(cat $GITHUB_OUTPUT | grep "status=" | awk -F'=' '{print $2}') \
           && env.UPLOAD_BIN_DIR == 'true'
         with:
           name: "OpenWrt_bin_${{ matrix.target }}_${{ env.date }}"
