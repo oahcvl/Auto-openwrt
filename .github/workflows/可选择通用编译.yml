@@ -54,10 +54,16 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
+
+    name: 编译 ${{matrix.target}}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [inputs.source_branch]
     steps:
       - name: 检测脚本设置
         run: |
-          source "${GITHUB_WORKSPACE}/build/${{ inputs.source_branch }}/settings.ini"
+          source "${GITHUB_WORKSPACE}/build/${{ matrix.target }}/settings.ini"
           echo "REPO_URL=$REPO_URL" >> $GITHUB_ENV
           echo "REPO_BRANCH=$REPO_BRANCH" >> $GITHUB_ENV
           echo "CONFIG_FILE=$CONFIG_FILE" >> $GITHUB_ENV
@@ -77,7 +83,7 @@ jobs:
         uses: emon100/Action-Serverchan@master
         with:
           SCKEY: ${{ secrets.SCKEY }}
-          text: 开始编译${{ inputs.source_branch }}啦
+          text: 开始编译${{ matrix.target }}啦
           desp: 主人您设置要编译的[${{ env.WXFB_MESSAGE }}]固件正在努力耕耘中......
       
       - name: 开始安装编译所需系统
@@ -106,33 +112,33 @@ jobs:
           cp -Rf $(find ./ -maxdepth 1 -type d ! -path './openwrt' ! -path './') openwrt
           cd openwrt
           echo "应用补丁"
-          if [ -n "$(ls -A "build/${{inputs.source_branch}}/patches" 2>/dev/null)" ]; then
+          if [ -n "$(ls -A "build/${{matrix.target}}/patches" 2>/dev/null)" ]; then
             (
-              find "build/${{inputs.source_branch}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%' | patch -d './' -p0 --forward" || true
+              find "build/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%' | patch -d './' -p0 --forward" || true
             )
           fi
-          if [ -f "build/${{inputs.source_branch}}/$DIY_P1_SH" ]; then
+          if [ -f "build/${{matrix.target}}/$DIY_P1_SH" ]; then
             (
-              chmod +x "build/${{inputs.source_branch}}/$DIY_P1_SH"
-              /bin/bash "build/${{inputs.source_branch}}/$DIY_P1_SH"
+              chmod +x "build/${{matrix.target}}/$DIY_P1_SH"
+              /bin/bash "build/${{matrix.target}}/$DIY_P1_SH"
             )
           fi
           ./scripts/feeds clean
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-          if [ -n "$(ls -A "build/${{inputs.source_branch}}/files" 2>/dev/null)" ]; then
-            cp -rf "build/${{inputs.source_branch}}/files" files
+          if [ -n "$(ls -A "build/${{matrix.target}}/files" 2>/dev/null)" ]; then
+            cp -rf "build/${{matrix.target}}/files" files
           fi
-          if [ -n "$(ls -A "build/${{inputs.source_branch}}/diy" 2>/dev/null)" ]; then
-            cp -Rf "build/${{inputs.source_branch}}/diy"/* ./
+          if [ -n "$(ls -A "build/${{matrix.target}}/diy" 2>/dev/null)" ]; then
+            cp -Rf "build/${{matrix.target}}/diy"/* ./
           fi
-          if [ -f "build/${{inputs.source_branch}}/$DIY_P2_SH" ]; then
+          if [ -f "build/${{matrix.target}}/$DIY_P2_SH" ]; then
             (
-              chmod +x "build/${{inputs.source_branch}}/$DIY_P2_SH"
-              /bin/bash "build/${{inputs.source_branch}}/$DIY_P2_SH"
+              chmod +x "build/${{matrix.target}}/$DIY_P2_SH"
+              /bin/bash "build/${{matrix.target}}/$DIY_P2_SH"
             )
           fi
-          mv "build/${{inputs.source_branch}}/$CONFIG_FILE" .config
+          mv "build/${{matrix.target}}/$CONFIG_FILE" .config
           make defconfig
           DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' | tr '[:upper:]' '[:lower:]')
           if [ "$DEVICE_NAME" == "generic" ]; then
@@ -168,7 +174,7 @@ jobs:
         uses: actions/upload-artifact@v2
         if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
         with:
-          name: "OpenWrt_bin_${{ inputs.source_branch }}_${{ env.date }}"
+          name: "OpenWrt_bin_${{ matrix.target }}_${{ env.date }}"
           path: openwrt/bin
 
       - name: 整理固件文件夹
@@ -202,14 +208,14 @@ jobs:
         if: steps.organizer.outputs.status == 'success' && env.UPLOAD_CONFIG == 'true'
         uses: actions/upload-artifact@v2
         with:
-          name: .config_${{inputs.source_branch}}_${{ env.date }}
+          name: .config_${{matrix.target}}_${{ env.date }}
           path: ./config
       
       - name: 上传固件到GitHub空间
         if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
         uses: actions/upload-artifact@v2
         with:
-          name: OpenWrt_firmware_${{inputs.source_branch}}_${{ env.date }}
+          name: OpenWrt_firmware_${{matrix.target}}_${{ env.date }}
           path: ${{ env.FIRMWARE }}
       
       - name: 上传固件到「奶牛快传」和「WeTransfer」
@@ -245,7 +251,7 @@ jobs:
             ☆  分支 : ${{ env.REPO_BRANCH }}
             ☆  感谢源码作者无私分享！
       
-            🎉 [ ${{ inputs.source_branch }} ]固件下载 ✨
+            🎉 [ ${{ matrix.target }} ]固件下载 ✨
       
             💐 奶牛快传(国内高速🚀下载)： ${{ env.COWTRANSFER_URL }}
       
@@ -260,7 +266,7 @@ jobs:
         with:
           SCKEY: ${{ secrets.SCKEY }}
           text: |-
-            恭喜主人${{ inputs.source_branch }}固件编译成功！
+            恭喜主人${{ matrix.target }}固件编译成功！
             
             完成时间：${{ env.date1 }}
             
