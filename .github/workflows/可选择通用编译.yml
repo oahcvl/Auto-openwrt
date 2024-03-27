@@ -65,7 +65,6 @@ jobs:
       matrix:
         target: ["${{inputs.source_branch}}"]
     steps:
-    
     - name: 准备结束
       uses: actions/checkout@v2
  
@@ -117,35 +116,42 @@ jobs:
   
     - name: 加载源, 应用补丁和自定义设置
       run: |
+        # 复制非openwrt目录到openwrt目录下
         cp -Rf $(find ./ -maxdepth 1 -type d ! -path './openwrt' ! -path './') openwrt
         cd openwrt
-        echo "应用补丁"
+        
+        # 应用补丁
+        echo "正在应用补丁..."
         if [ -n "$(ls -A "build/${{matrix.target}}/patches" 2>/dev/null)" ]; then
-          (
-            find "build/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%' | patch -d './' -p0 --forward" || true
-          )
+          find "build/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%' | patch -d './' -p0 --forward" || true
         fi
+        
+        # 执行自定义脚本1
         if [ -f "build/${{matrix.target}}/$DIY_P1_SH" ]; then
-          (
-            chmod +x "build/${{matrix.target}}/$DIY_P1_SH"
-            /bin/bash "build/${{matrix.target}}/$DIY_P1_SH"
-          )
+          chmod +x "build/${{matrix.target}}/$DIY_P1_SH"
+          /bin/bash "build/${{matrix.target}}/$DIY_P1_SH"
         fi
+        
+        # 清理并更新feeds
         ./scripts/feeds clean
         ./scripts/feeds update -a
         ./scripts/feeds install -a
+        
+        # 复制文件和目录
         if [ -n "$(ls -A "build/${{matrix.target}}/files" 2>/dev/null)" ]; then
           cp -rf "build/${{matrix.target}}/files" files
         fi
         if [ -n "$(ls -A "build/${{matrix.target}}/diy" 2>/dev/null)" ]; then
           cp -Rf "build/${{matrix.target}}/diy"/* ./
         fi
+        
+        # 执行自定义脚本2
         if [ -f "build/${{matrix.target}}/$DIY_P2_SH" ]; then
-          (
-            chmod +x "build/${{matrix.target}}/$DIY_P2_SH"
-            /bin/bash "build/${{matrix.target}}/$DIY_P2_SH"
-          )
+          chmod +x "build/${{matrix.target}}/$DIY_P2_SH"
+          /bin/bash "build/${{matrix.target}}/$DIY_P2_SH"
         fi
+        
+        # 配置并设置设备名称
         mv "build/${{matrix.target}}/$CONFIG_FILE" .config
         make defconfig
         DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' | tr '[:upper:]' '[:lower:]')
