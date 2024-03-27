@@ -46,7 +46,7 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
       - name: 准备结束
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
    
       - name: 检测脚本设置
         run: |
