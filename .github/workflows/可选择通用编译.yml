@@ -53,6 +53,7 @@ jobs:
           echo "WXFB_MESSAGE=$WXFB_MESSAGE" >> $GITHUB_ENV
           echo "DIY_P1_SH=$DIY_P1_SH" >> $GITHUB_ENV
           echo "DIY_P2_SH=$DIY_P2_SH" >> $GITHUB_ENV
+          echo "DIY_P3_SH=$DIY_P3_SH" >> $GITHUB_ENV
           echo "SSH_ACTIONS=$SSH_ACTIONS" >> $GITHUB_ENV
           echo "UPLOAD_BIN_DIR=$UPLOAD_BIN_DIR" >> $GITHUB_ENV
           echo "UPLOAD_CONFIG=$UPLOAD_CONFIG" >> $GITHUB_ENV
@@ -193,16 +194,16 @@ jobs:
       - name: 上传固件到「奶牛快传」
         if: steps.organizer.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
         run: |
-          chmod +x build/$DIY_P3_SH
-          sh "build/$DIY_P3_SH"
+          chmod +x build/${{inputs.source_branch}}/$DIY_P3_SH
+          sh "build/${{inputs.source_branch}}/$DIY_P3_SH"
           ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
           echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
       
       - name: 提取发布用的「奶牛快传」的链接
         if: steps.organizer.outputs.status == 'success' && !cancelled()
         run: |
-          chmod +x build/$DIY_P3_SH
-          sh "build/$DIY_P3_SH"
+          chmod +x build/${{inputs.source_branch}}/$DIY_P3_SH
+          sh "build/${{inputs.source_branch}}/$DIY_P3_SH"
           ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
           echo "COWTRANSFER_URL=$(cat cowtransfer.log | grep "https" | cut -f3 -d ")")" >> $GITHUB_ENV
       
