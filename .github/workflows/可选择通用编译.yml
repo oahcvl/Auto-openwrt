@@ -7,7 +7,7 @@
 #
 
 
-name: build-openwrt
+name: 可选择编译
 
 on:
   repository_dispatch:
