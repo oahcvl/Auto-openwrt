@@ -193,19 +193,16 @@ jobs:
       - name: 上传固件到「奶牛快传」
         if: steps.organizer.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
         run: |
-          if [ -f "build/${{inputs.source_branch}}/$DIY_P2_SH" ]; then
-          (
-            chmod +x build/${{inputs.source_branch}}/$DIY_P2_SH
-            /bin/bash "build/${{inputs.source_branch}}/$DIY_P2_SH"
-          )
-          curl -fsSL git.io/file-transfer | sh
+          chmod +x build/$DIY_P3_SH
+          sh "build/$DIY_P3_SH"
           ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
           echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
       
       - name: 提取发布用的「奶牛快传」的链接
         if: steps.organizer.outputs.status == 'success' && !cancelled()
         run: |
-          curl -fsSL git.io/file-transfer | sh
+          chmod +x build/$DIY_P3_SH
+          sh "build/$DIY_P3_SH"
           ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
           echo "COWTRANSFER_URL=$(cat cowtransfer.log | grep "https" | cut -f3 -d ")")" >> $GITHUB_ENV
       
