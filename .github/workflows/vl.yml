@@ -63,7 +63,7 @@ jobs:
       - name: PUSHPLUS信息通知
         if: env.SERVERCHAN_SCKEY == 'true'
         run: |
-          curl -k --data token="${{secrets.PUSH_PLUS_TOKEN}}" --data title="开始编译【${{inputs.source_branch}}】" --data "content=🎉 主人：您【${{inputs.source_branch}}】固件编译中,请耐心等待......"
+          curl -k --data token="${{secrets.PUSH_PLUS_TOKEN}}" --data title="开始编译【${{inputs.source_branch}}】" --data "content=🎉 主人：您【${{inputs.source_branch}}】固件编译中,请耐心等待......" "http://www.pushplus.plus/send"
         
       - name: 开始安装编译所需系统
         env:
@@ -203,4 +203,4 @@ jobs:
       - name: PUSHPLUS信息通知
         if: steps.organizer.outputs.status == 'success' && env.SERVERCHAN_SCKEY == 'true'
         run: |
-          curl -k --data token="${{secrets.PUSH_PLUS_TOKEN}}" --data title="[${{inputs.source_branch}}]编译成功" --data "content=我亲爱的✨主人✨：您【${{inputs.source_branch}}】的固件顺利编译完成了！" "🎉 固件下载地址✨：${{ env.GITHUB_RELEASE }},奶牛快传：${{ env.COWTRANSFER_URL }}"
+          curl -k --data token="${{secrets.PUSH_PLUS_TOKEN}}" --data title="[${{inputs.source_branch}}]编译成功" --data "content=我亲爱的✨主人✨：您【${{inputs.source_branch}}】的固件顺利编译完成了！🎉 固件下载地址✨：${{ env.GITHUB_RELEASE }},奶牛快传：${{ env.COWTRANSFER_URL }}" "http://www.pushplus.plus/send"
