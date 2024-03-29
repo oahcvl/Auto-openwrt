@@ -217,6 +217,7 @@ jobs:
               💐 奶牛快传(国内高速🚀下载)： ${{ env.COWTRANSFER_URL }}
               🌴 链接有效期为7天，无需注册直接下载 🐤
           文件: ${{ env.FIRMWARE }}/*
+      
       - name: PUSHPLUS信息通知
         if: steps.organizer.outputs.status == 'success' && env.SERVERCHAN_SCKEY == 'true'
         run: |
