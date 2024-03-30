@@ -185,14 +185,24 @@ jobs:
         with:
           name: OpenWrt_firmware_${{inputs.source_branch}}_${{ env.date }}
           path: ${{ env.FIRMWARE }}
-  
+      
+      - name: 安装「奶牛快传」CLI 的命令
+        run: |
+          wget https://cli.cowtransfer.com/latest/cowtransfer-cli-linux-amd64 -O cowtransfer
+          chmod +x cowtransfer
+          sudo mv cowtransfer /usr/local/bin/
+
       - name: 上传固件到「奶牛快传」
         if: steps.organizer.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+        env:
+          COWTRANSFER_API_KEY: ${{ secrets.COWTRANSFER_API_KEY }}
         run: |
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-          echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-      
+          # 上传文件并获取响应
+          response=$(cowtransfer upload --api-key "$COWTRANSFER_API_KEY" --file-path "path/to/your/file.ext" --remote-path "remote/path/file.ext" --json)
+          # 解析响应以获取下载链接
+          download_link=$(echo "$response" | jq -r '.data.link')
+          download_link=${{ steps.upload-to-cowtransfer.outputs.download_link }}
+          
       - name: 提取发布用的「奶牛快传」的链接
         if: steps.organizer.outputs.status == 'success' && !cancelled()
         run: |
