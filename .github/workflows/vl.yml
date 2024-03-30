@@ -198,17 +198,11 @@ jobs:
           COWTRANSFER_API_KEY: ${{ secrets.COWTRANSFER_API_KEY }}
         run: |
           # 上传文件并获取响应
-          response=$(cowtransfer upload --api-key "$COWTRANSFER_API_KEY" --file-path "path/to/your/file.ext" --remote-path "remote/path/file.ext" --json)
+          response=$(cowtransfer upload --api-key "$COWTRANSFER_API_KEY" --file-path ${FIRMWARE} --remote-path "云编译/${FIRMWARE}" --json)
           # 解析响应以获取下载链接
           download_link=$(echo "$response" | jq -r '.data.link')
-          download_link=${{ steps.upload-to-cowtransfer.outputs.download_link }}
-          
-      - name: 提取发布用的「奶牛快传」的链接
-        if: steps.organizer.outputs.status == 'success' && !cancelled()
-        run: |
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-          echo "COWTRANSFER_URL=$(cat cowtransfer.log | grep "https" | cut -f3 -d ")")" >> $GITHUB_ENV
+          # 将下载链接存储在输出中，以便其他步骤可以使用
+          echo "download_link=$download_link" >> $GITHUB_OUTPUT
       
       - name: PUSHPLUS信息通知
         if: steps.organizer.outputs.status == 'success' && env.SERVERCHAN_SCKEY == 'true'
