@@ -16,7 +16,7 @@ on:
       source_branch:
         description: "选择机型"
         required: false
-        default: "Lede_x86_64"
+        default: "Lede_newifi_d2"
         type: choice
         options:
           - Lede_x86_64
