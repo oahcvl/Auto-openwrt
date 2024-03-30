@@ -194,7 +194,7 @@ jobs:
           chmod +x cowtransfer
           sudo mv cowtransfer /usr/local/bin/
           # 上传文件并获取下载链接
-          ./transfer cow --block 2621440 -s -p 64 --no-progress ${{ env.FIRMWARE }} 2>&1 | tee cowtransfer.log | grep "https" | cut -f3 -d ")"
+          ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log | grep "https" | cut -f3 -d ")"
           # 将下载链接存储在输出中，以便其他步骤可以使用
           echo "COWTRANSFER_URL=$(cat cowtransfer.log | grep "https" | cut -f3 -d ")")" >> $GITHUB_ENV
      
